@@ -1,3 +1,7 @@
+<script src="https://www.gstatic.com/firebasejs/9.x/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.x/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.x/firebase-database.js"></script>
+
 // Firebase configuration (replace with your config from Firebase Console)
 const firebaseConfig = {
   apiKey: "AIzaSyAenFp_Ryes3-0kLfb_vNR_PHLlsA08OK4",
