@@ -21,7 +21,7 @@ function createUser(userId) {
       if (users[userId]) {
         alert("User already exists.");
       } else {
-        users[userId] = { coins: 100, transactions: [] }; // Default starting coins
+        users[userId] = { coins: 100 }; // Default starting coins
         updateBin(users, "User created successfully with 100 coins.");
       }
     })
@@ -73,8 +73,7 @@ function checkBalance(userId) {
       if (!users[userId]) {
         alert("User does not exist.");
       } else {
-        document.getElementById("balance").innerText = `Your Balance: ${users[userId].coins} coins`;
-        displayTransactions(users[userId].transactions);
+        alert(`User's balance: ${users[userId].coins} coins.`);
       }
     })
     .catch(error => console.error("Error checking balance:", error));
@@ -113,20 +112,6 @@ function transferCoins(senderId, receiverId, amount) {
       users[senderId].coins -= amount;
       users[receiverId].coins += amount;
 
-      // Add transaction history
-      users[senderId].transactions.push({
-        type: 'Sent',
-        to: receiverId,
-        amount: amount,
-        date: new Date().toLocaleString()
-      });
-      users[receiverId].transactions.push({
-        type: 'Received',
-        from: senderId,
-        amount: amount,
-        date: new Date().toLocaleString()
-      });
-
       // Update the bin
       updateBin(users, "Transfer successful.");
     })
@@ -148,17 +133,3 @@ function updateBin(users, message) {
     })
     .catch(error => console.error("Error updating bin:", error));
 }
-
-// Function to display transactions on the UI
-function displayTransactions(transactions) {
-  const transactionHistory = document.getElementById("transactionHistory");
-  transactionHistory.innerHTML = '';
-
-  transactions.forEach(txn => {
-    const txnElement = document.createElement('li');
-    txnElement.innerText = `${txn.date} - ${txn.type} ${txn.amount} coins ${txn.to ? 'to ' + txn.to : ''} ${txn.from ? 'from ' + txn.from : ''}`;
-    transactionHistory.appendChild(txnElement);
-  });
-}
-
-
