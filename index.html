@@ -3,59 +3,140 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Firebase Authentication Debug</title>
-  <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.x/firebase-auth.js"></script>
+  <title>Virtual Coin System</title>
 </head>
 <body>
-  <h1>Firebase Authentication Debug</h1>
-  <button id="login-button">Login Anonymously</button>
-  <p id="user-info"></p>
-  
+  <h1>Virtual Coin System</h1>
+
+  <!-- User Interface -->
+  <div>
+    <h2>Create User</h2>
+    <input type="text" id="newUserId" placeholder="Enter User ID">
+    <button onclick="createUser()">Create User</button>
+    <p id="createUserMessage"></p>
+  </div>
+
+  <div>
+    <h2>Manage Coins</h2>
+    <input type="text" id="manageUserId" placeholder="Enter User ID">
+    <input type="number" id="coinAmount" placeholder="Enter Coins (+ or -)">
+    <button onclick="updateCoins()">Update Coins</button>
+    <p id="updateCoinMessage"></p>
+  </div>
+
+  <div>
+    <h2>Check Balance</h2>
+    <input type="text" id="checkUserId" placeholder="Enter User ID">
+    <button onclick="checkBalance()">Check Balance</button>
+    <p id="balanceMessage"></p>
+  </div>
+
   <script>
-    console.log("Initializing Firebase...");
+    const apiKey = "$2a$10$Eti1haWYiEHfN8NWMSZ.zeFpqBDokVahGAvEWfuNSsXXDMbnZYfiq"; // Replace with your JSONbin API key
+    const binId = "673c46cdacd3cb34a8aaf76c"; // Replace with your JSONbin Bin ID
 
-    // Firebase Config
-    const firebaseConfig = {
-        apiKey: "AIzaSyAenFp_Ryes3-0kLfb_vNR_PHLlsA08OK4",
-        authDomain: "lol-coin-9c308.firebaseapp.com",
-        projectId: "lol-coin-9c308",
-        storageBucket: "lol-coin-9c308.firebasestorage.app",
-        messagingSenderId: "143807595945",
-        appId: "1:143807595945:web:4234c550db627e4c0870b8",
-        measurementId: "G-CQGZ15FFJT"
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    console.log("Firebase initialized.");
-
-    // Handle anonymous login
-    document.getElementById('login-button').addEventListener('click', () => {
-      console.log("Login button clicked.");
-      firebase.auth().signInAnonymously()
-        .then((userCredential) => {
-          console.log("User signed in successfully:", userCredential.user.uid);
-          document.getElementById('user-info').innerText = `User ID: ${userCredential.user.uid}`;
-        })
-        .catch((error) => {
-          console.error("Error during login:", error.message);
-        });
-    });
-
-    // Monitor authentication state
-    firebase.auth().onAuthStateChanged((user) => {
-      if (user) {
-        console.log("User is signed in:", user.uid);
-        document.getElementById('user-info').innerText = `User ID: ${user.uid}`;
-      } else {
-        console.log("No user signed in.");
-        document.getElementById('user-info').innerText = "No user signed in.";
+    // Function to create a new user
+    function createUser() {
+      const userId = document.getElementById("newUserId").value;
+      if (!userId) {
+        document.getElementById("createUserMessage").innerText = "User ID is required!";
+        return;
       }
-    });
+
+      fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        method: "GET",
+        headers: {
+          "X-Master-Key": apiKey,
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          const users = data.record || {};
+          if (users[userId]) {
+            document.getElementById("createUserMessage").innerText = "User already exists!";
+          } else {
+            users[userId] = { coins: 100 }; // Default starting coins
+            updateBin(users, "User created successfully with 100 coins.");
+          }
+        })
+        .catch(error => console.error("Error fetching users:", error));
+    }
+
+    // Function to update a user's coins
+    function updateCoins() {
+      const userId = document.getElementById("manageUserId").value;
+      const coinAmount = parseInt(document.getElementById("coinAmount").value, 10);
+
+      if (!userId || isNaN(coinAmount)) {
+        document.getElementById("updateCoinMessage").innerText = "User ID and valid coin amount are required!";
+        return;
+      }
+
+      fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        method: "GET",
+        headers: {
+          "X-Master-Key": apiKey,
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          const users = data.record || {};
+          if (!users[userId]) {
+            document.getElementById("updateCoinMessage").innerText = "User does not exist!";
+          } else {
+            users[userId].coins += coinAmount;
+            updateBin(users, `User's coin balance updated by ${coinAmount}.`);
+          }
+        })
+        .catch(error => console.error("Error updating coins:", error));
+    }
+
+    // Function to check a user's balance
+    function checkBalance() {
+      const userId = document.getElementById("checkUserId").value;
+      if (!userId) {
+        document.getElementById("balanceMessage").innerText = "User ID is required!";
+        return;
+      }
+
+      fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        method: "GET",
+        headers: {
+          "X-Master-Key": apiKey,
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          const users = data.record || {};
+          if (!users[userId]) {
+            document.getElementById("balanceMessage").innerText = "User does not exist!";
+          } else {
+            document.getElementById("balanceMessage").innerText = `User's balance: ${users[userId].coins} coins.`;
+          }
+        })
+        .catch(error => console.error("Error checking balance:", error));
+    }
+
+    // Function to update the JSONbin data
+    function updateBin(data, successMessage) {
+      fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": apiKey,
+        },
+        body: JSON.stringify(data),
+      })
+        .then(() => {
+          document.getElementById("createUserMessage").innerText = successMessage || "";
+          document.getElementById("updateCoinMessage").innerText = successMessage || "";
+        })
+        .catch(error => console.error("Error updating JSONbin:", error));
+    }
   </script>
 </body>
 </html>
+
 
   <h2>Transaction Log</h2>
   <ul id="log"></ul>
