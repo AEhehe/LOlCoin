@@ -3,26 +3,137 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Coin Wallet</title>
+  <title>Virtual Coin System</title>
 </head>
 <body>
   <h1>Virtual Coin System</h1>
 
-  <!-- Create User -->
-  <input type="text" id="createUserId" placeholder="Enter User ID">
-  <button onclick="createUser(document.getElementById('createUserId').value)">Create User</button>
+  <!-- User Interface -->
+  <div>
+    <h2>Create User</h2>
+    <input type="text" id="newUserId" placeholder="Enter User ID">
+    <button onclick="createUser()">Create User</button>
+    <p id="createUserMessage"></p>
+  </div>
 
-  <!-- Transfer Coins -->
-  <input type="text" id="senderId" placeholder="Sender User ID">
-  <input type="text" id="receiverId" placeholder="Receiver User ID">
-  <input type="number" id="transferAmount" placeholder="Amount to Transfer">
-  <button onclick="transferCoins(document.getElementById('senderId').value, document.getElementById('receiverId').value, parseInt(document.getElementById('transferAmount').value))">Transfer Coins</button>
+  <div>
+    <h2>Manage Coins</h2>
+    <input type="text" id="manageUserId" placeholder="Enter User ID">
+    <input type="number" id="coinAmount" placeholder="Enter Coins (+ or -)">
+    <button onclick="updateCoins()">Update Coins</button>
+    <p id="updateCoinMessage"></p>
+  </div>
 
-  <!-- Check Balance -->
-  <input type="text" id="checkUserId" placeholder="Enter User ID">
-  <button onclick="checkBalance(document.getElementById('checkUserId').value)">Check Balance</button>
+  <div>
+    <h2>Check Balance</h2>
+    <input type="text" id="checkUserId" placeholder="Enter User ID">
+    <button onclick="checkBalance()">Check Balance</button>
+    <p id="balanceMessage"></p>
+  </div>
 
-  <script src="scripts.js"></script>
+  <script>
+    const apiKey = "YOUR_JSONBIN_API_KEY"; // Replace with your JSONbin API key
+    const binId = "YOUR_BIN_ID"; // Replace with your JSONbin Bin ID
+
+    // Function to create a new user
+    function createUser() {
+      const userId = document.getElementById("newUserId").value;
+      if (!userId) {
+        document.getElementById("createUserMessage").innerText = "User ID is required!";
+        return;
+      }
+
+      fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        method: "GET",
+        headers: {
+          "X-Master-Key": apiKey,
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          const users = data.record || {};
+          if (users[userId]) {
+            document.getElementById("createUserMessage").innerText = "User already exists!";
+          } else {
+            users[userId] = { coins: 100 }; // Default starting coins
+            updateBin(users, "User created successfully with 100 coins.");
+          }
+        })
+        .catch(error => console.error("Error fetching users:", error));
+    }
+
+    // Function to update a user's coins
+    function updateCoins() {
+      const userId = document.getElementById("manageUserId").value;
+      const coinAmount = parseInt(document.getElementById("coinAmount").value, 10);
+
+      if (!userId || isNaN(coinAmount)) {
+        document.getElementById("updateCoinMessage").innerText = "User ID and valid coin amount are required!";
+        return;
+      }
+
+      fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        method: "GET",
+        headers: {
+          "X-Master-Key": apiKey,
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          const users = data.record || {};
+          if (!users[userId]) {
+            document.getElementById("updateCoinMessage").innerText = "User does not exist!";
+          } else {
+            users[userId].coins += coinAmount;
+            updateBin(users, `User's coin balance updated by ${coinAmount}.`);
+          }
+        })
+        .catch(error => console.error("Error updating coins:", error));
+    }
+
+    // Function to check a user's balance
+    function checkBalance() {
+      const userId = document.getElementById("checkUserId").value;
+      if (!userId) {
+        document.getElementById("balanceMessage").innerText = "User ID is required!";
+        return;
+      }
+
+      fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+        method: "GET",
+        headers: {
+          "X-Master-Key": apiKey,
+        },
+      })
+        .then(response => response.json())
+        .then(data => {
+          const users = data.record || {};
+          if (!users[userId]) {
+            document.getElementById("balanceMessage").innerText = "User does not exist!";
+          } else {
+            document.getElementById("balanceMessage").innerText = `User's balance: ${users[userId].coins} coins.`;
+          }
+        })
+        .catch(error => console.error("Error checking balance:", error));
+    }
+
+    // Function to update the JSONbin data
+    function updateBin(data, successMessage) {
+      fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "X-Master-Key": apiKey,
+        },
+        body: JSON.stringify(data),
+      })
+        .then(() => {
+          document.getElementById("createUserMessage").innerText = successMessage || "";
+          document.getElementById("updateCoinMessage").innerText = successMessage || "";
+        })
+        .catch(error => console.error("Error updating JSONbin:", error));
+    }
+  </script>
 </body>
 </html>
 
