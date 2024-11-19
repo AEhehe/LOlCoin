@@ -1,14 +1,16 @@
 // Define the API Key and Bin ID for JSONbin
 const apiKey = "$2a$10$lMCbbBuOmkiE0CnjxKT2lORHcVZk2bHvhS3swv5vO2sz5NtClB2rK"; // Replace with your actual API key
-const binId = "673c5cb8e41b4d34e456cd38";           // Replace with your actual Bin ID
+const binId = "673c46cdacd3cb34a8aaf76c";           // Replace with your actual Bin ID
 
-// Function to create a new user with an initial balance
-function createUser(userId) {
+// Function to create a new user in the database
+function createUser() {
+  const userId = document.getElementById("newUserId").value;
   if (!userId) {
-    alert("User ID is required.");
+    document.getElementById("createUserMessage").innerText = "User ID is required!";
     return;
   }
 
+  // Fetch the current data from JSONbin
   fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
     method: "GET",
     headers: {
@@ -19,19 +21,23 @@ function createUser(userId) {
     .then(data => {
       const users = data.record || {};
       if (users[userId]) {
-        alert("User already exists.");
+        document.getElementById("createUserMessage").innerText = "User already exists!";
       } else {
-        users[userId] = { coins: 100 }; // Default starting coins
+        // Add the new user with starting coins (e.g., 100)
+        users[userId] = { coins: 100 };
         updateBin(users, "User created successfully with 100 coins.");
       }
     })
-    .catch(error => console.error("Error creating user:", error));
+    .catch(error => console.error("Error fetching users:", error));
 }
 
-// Function to update a user's coin balance
-function updateCoins(userId, coinAmount) {
+// Function to update the user's coin balance
+function updateCoins() {
+  const userId = document.getElementById("manageUserId").value;
+  const coinAmount = parseInt(document.getElementById("coinAmount").value, 10);
+
   if (!userId || isNaN(coinAmount)) {
-    alert("Valid user ID and coin amount are required.");
+    document.getElementById("updateCoinMessage").innerText = "User ID and valid coin amount are required!";
     return;
   }
 
@@ -45,19 +51,20 @@ function updateCoins(userId, coinAmount) {
     .then(data => {
       const users = data.record || {};
       if (!users[userId]) {
-        alert("User does not exist.");
+        document.getElementById("updateCoinMessage").innerText = "User does not exist!";
       } else {
-        users[userId].coins += coinAmount;
+        users[userId].coins += coinAmount; // Update the coin balance
         updateBin(users, `User's coin balance updated by ${coinAmount}.`);
       }
     })
     .catch(error => console.error("Error updating coins:", error));
 }
 
-// Function to check the balance of a user
-function checkBalance(userId) {
+// Function to check the user's coin balance
+function checkBalance() {
+  const userId = document.getElementById("checkUserId").value;
   if (!userId) {
-    alert("User ID is required.");
+    document.getElementById("balanceMessage").innerText = "User ID is required!";
     return;
   }
 
@@ -71,65 +78,28 @@ function checkBalance(userId) {
     .then(data => {
       const users = data.record || {};
       if (!users[userId]) {
-        alert("User does not exist.");
+        document.getElementById("balanceMessage").innerText = "User does not exist!";
       } else {
-        alert(`User's balance: ${users[userId].coins} coins.`);
+        document.getElementById("balanceMessage").innerText = `User's balance: ${users[userId].coins} coins.`;
       }
     })
     .catch(error => console.error("Error checking balance:", error));
 }
 
-// Function to transfer coins between users
-function transferCoins(senderId, receiverId, amount) {
-  if (!senderId || !receiverId || isNaN(amount) || amount <= 0) {
-    alert("Valid sender ID, receiver ID, and coin amount are required.");
-    return;
-  }
-
-  fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-    method: "GET",
-    headers: {
-      "X-Master-Key": apiKey,
-    },
-  })
-    .then(response => response.json())
-    .then(data => {
-      const users = data.record || {};
-
-      // Check if both users exist
-      if (!users[senderId] || !users[receiverId]) {
-        alert("Both users must exist.");
-        return;
-      }
-
-      // Check if sender has enough coins
-      if (users[senderId].coins < amount) {
-        alert("Sender doesn't have enough coins.");
-        return;
-      }
-
-      // Perform the transfer
-      users[senderId].coins -= amount;
-      users[receiverId].coins += amount;
-
-      // Update the bin
-      updateBin(users, "Transfer successful.");
-    })
-    .catch(error => console.error("Error transferring coins:", error));
-}
-
-// Function to update the JSONbin data with the new state
-function updateBin(users, message) {
+// Function to update the JSONbin with new data
+function updateBin(data, successMessage) {
   fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json",
       "X-Master-Key": apiKey,
     },
-    body: JSON.stringify(users),
+    body: JSON.stringify(data),
   })
     .then(() => {
-      alert(message || "Action completed.");
+      document.getElementById("createUserMessage").innerText = successMessage || "";
+      document.getElementById("updateCoinMessage").innerText = successMessage || "";
     })
-    .catch(error => console.error("Error updating bin:", error));
+    .catch(error => console.error("Error updating JSONbin:", error));
 }
+
