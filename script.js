@@ -1,6 +1,6 @@
 // Define the API Key and Bin ID for JSONbin
 const apiKey = "$2a$10$lMCbbBuOmkiE0CnjxKT2lORHcVZk2bHvhS3swv5vO2sz5NtClB2rK"; // Replace with your actual API key
-const binId = "673c46cdacd3cb34a8aaf76c";           // Replace with your actual Bin ID
+const binId = "673c5cb8e41b4d34e456cd38";           // Replace with your actual Bin ID
 
 // Function to create a new user with an initial balance
 function createUser(userId) {
