@@ -1,24 +1,62 @@
 <!DOCTYPE html>
-<script src="https://www.gstatic.com/firebasejs/9.x/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.x/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.x/firebase-database.js"></script>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Coin</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Firebase Authentication Debug</title>
+  <script src="https://www.gstatic.com/firebasejs/9.x/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.x/firebase-auth.js"></script>
 </head>
 <body>
-  <h1>Virtual Coin</h1>
-  <p>Your balance: <span id="balance">100</span> Coins</p>
-  <form id="transfer-form">
-    <label for="recipient">Recipient:</label>
-    <input type="text" id="recipient" placeholder="Enter name" required>
-    <label for="amount">Amount:</label>
-    <input type="number" id="amount" placeholder="Enter amount" required>
-    <button type="submit">Transfer</button>
-  </form>
+  <h1>Firebase Authentication Debug</h1>
+  <button id="login-button">Login Anonymously</button>
+  <p id="user-info"></p>
+  
+  <script>
+    console.log("Initializing Firebase...");
+
+    // Firebase Config
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+      databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT_ID.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    console.log("Firebase initialized.");
+
+    // Handle anonymous login
+    document.getElementById('login-button').addEventListener('click', () => {
+      console.log("Login button clicked.");
+      firebase.auth().signInAnonymously()
+        .then((userCredential) => {
+          console.log("User signed in successfully:", userCredential.user.uid);
+          document.getElementById('user-info').innerText = `User ID: ${userCredential.user.uid}`;
+        })
+        .catch((error) => {
+          console.error("Error during login:", error.message);
+        });
+    });
+
+    // Monitor authentication state
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        console.log("User is signed in:", user.uid);
+        document.getElementById('user-info').innerText = `User ID: ${user.uid}`;
+      } else {
+        console.log("No user signed in.");
+        document.getElementById('user-info').innerText = "No user signed in.";
+      }
+    });
+  </script>
+</body>
+</html>
+
   <h2>Transaction Log</h2>
   <ul id="log"></ul>
   <script src="script.js"></script>
