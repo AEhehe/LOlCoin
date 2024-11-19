@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Coin</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>Virtual Coin</h1>
+  <p>Your balance: <span id="balance">100</span> Coins</p>
+  <form id="transfer-form">
+    <label for="recipient">Recipient:</label>
+    <input type="text" id="recipient" placeholder="Enter name" required>
+    <label for="amount">Amount:</label>
+    <input type="number" id="amount" placeholder="Enter amount" required>
+    <button type="submit">Transfer</button>
+  </form>
+  <h2>Transaction Log</h2>
+  <ul id="log"></ul>
+  <script src="script.js"></script>
+</body>
+</html>
