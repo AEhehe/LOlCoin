@@ -80,26 +80,22 @@
   </style>
 </head>
 <body>
-  <div class="wallet-container">
-    <h1>Virtual Coin Wallet</h1>
-    <div class="input-group">
-      <input type="text" id="createUserId" placeholder="Enter User ID">
-      <button onclick="createUser(document.getElementById('createUserId').value)">Create User</button>
-    </div>
-    <div class="input-group">
-      <input type="text" id="senderId" placeholder="Sender User ID">
-      <input type="text" id="receiverId" placeholder="Receiver User ID">
-      <input type="number" id="transferAmount" placeholder="Amount to Transfer">
-      <button onclick="transferCoins(document.getElementById('senderId').value, document.getElementById('receiverId').value, parseInt(document.getElementById('transferAmount').value))">Transfer Coins</button>
-    </div>
-    <div class="input-group">
-      <input type="text" id="checkUserId" placeholder="Enter User ID to Check Balance">
-      <button onclick="checkBalance(document.getElementById('checkUserId').value)">Check Balance</button>
-    </div>
-    <div class="balance" id="balance">Your Balance: 0 coins</div>
-    <h3>Transaction History:</h3>
-    <ul id="transactionHistory" class="transaction-history"></ul>
-  </div>
+  <h1>Virtual Coin System</h1>
+
+  <!-- Create User -->
+  <input type="text" id="createUserId" placeholder="Enter User ID">
+  <button onclick="createUser(document.getElementById('createUserId').value)">Create User</button>
+
+  <!-- Transfer Coins -->
+  <input type="text" id="senderId" placeholder="Sender User ID">
+  <input type="text" id="receiverId" placeholder="Receiver User ID">
+  <input type="number" id="transferAmount" placeholder="Amount to Transfer">
+  <button onclick="transferCoins(document.getElementById('senderId').value, document.getElementById('receiverId').value, parseInt(document.getElementById('transferAmount').value))">Transfer Coins</button>
+
+  <!-- Check Balance -->
+  <input type="text" id="checkUserId" placeholder="Enter User ID">
+  <button onclick="checkBalance(document.getElementById('checkUserId').value)">Check Balance</button>
+
   <script src="scripts.js"></script>
 </body>
 </html>
