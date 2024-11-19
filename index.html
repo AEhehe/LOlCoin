@@ -17,9 +17,10 @@
   </div>
 
   <div>
-    <h2>Manage Coins</h2>
+    <h2>Send</h2>
     <input type="text" id="manageUserId" placeholder="Enter User ID">
-    <input type="number" id="coinAmount" placeholder="Enter Coins (+ or -)">
+    <input type="number" id="coinAmount" placeholder="Enter Coins coins amount">
+    <input type="number" id="managerUserId2" placeholder="Enter User 2 ID">
     <button onclick="updateCoins()">Update Coins</button>
     <p id="updateCoinMessage"></p>
   </div>
@@ -65,6 +66,7 @@
     // Function to update a user's coins
     function updateCoins() {
       const userId = document.getElementById("manageUserId").value;
+      const userId2 = document.getElementById("manageUserId2").value;
       const coinAmount = parseInt(document.getElementById("coinAmount").value, 10);
 
       if (!userId || isNaN(coinAmount)) {
@@ -84,7 +86,8 @@
           if (!users[userId]) {
             document.getElementById("updateCoinMessage").innerText = "User does not exist!";
           } else {
-            users[userId].coins += coinAmount;
+            users[userId].coins -= coinAmount;
+            users[userId2].coins += coinAmount;
             updateBin(users, `User's coin balance updated by ${coinAmount}.`);
           }
         })
