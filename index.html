@@ -4,31 +4,108 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Virtual Coin Wallet</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background-color: #f5f5f5;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .wallet-container {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      width: 400px;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .balance {
+      font-size: 18px;
+      color: #4caf50;
+      text-align: center;
+      margin: 20px 0;
+    }
+
+    .input-group {
+      display: flex;
+      margin-bottom: 15px;
+      justify-content: space-between;
+    }
+
+    input[type="text"], input[type="number"] {
+      padding: 10px;
+      width: 80%;
+      margin-right: 10px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 10px 20px;
+      background-color: #4caf50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
+    .transaction-history {
+      margin-top: 20px;
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .transaction-history li {
+      background-color: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+  </style>
 </head>
 <body>
-  <h1>Virtual Coin System</h1>
+  <div class="wallet-container">
+    <h1>Virtual Coin Wallet</h1>
 
-  <!-- Create User -->
-  <input type="text" id="createUserId" placeholder="Enter User ID">
-  <button onclick="createUser(document.getElementById('createUserId').value)">Create User</button>
+    <!-- User Actions -->
+    <div class="input-group">
+      <input type="text" id="createUserId" placeholder="Enter User ID">
+      <button onclick="createUser(document.getElementById('createUserId').value)">Create User</button>
+    </div>
 
-  <!-- Transfer Coins -->
-  <input type="text" id="senderId" placeholder="Sender User ID">
-  <input type="text" id="receiverId" placeholder="Receiver User ID">
-  <input type="number" id="transferAmount" placeholder="Amount to Transfer">
-  <button onclick="transferCoins(document.getElementById('senderId').value, document.getElementById('receiverId').value, parseInt(document.getElementById('transferAmount').value))">Transfer Coins</button>
+    <div class="input-group">
+      <input type="text" id="senderId" placeholder="Sender User ID">
+      <input type="text" id="receiverId" placeholder="Receiver User ID">
+      <input type="number" id="transferAmount" placeholder="Amount to Transfer">
+      <button onclick="transferCoins(document.getElementById('senderId').value, document.getElementById('receiverId').value, parseInt(document.getElementById('transferAmount').value))">Transfer Coins</button>
+    </div>
 
-  <!-- Check Balance -->
-  <input type="text" id="checkUserId" placeholder="Enter User ID">
-  <button onclick="checkBalance(document.getElementById('checkUserId').value)">Check Balance</button>
+    <div class="input-group">
+      <input type="text" id="checkUserId" placeholder="Enter User ID to Check Balance">
+      <button onclick="checkBalance(document.getElementById('checkUserId').value)">Check Balance</button>
+    </div>
+
+    <div class="balance" id="balance">Your Balance: 0 coins</div>
+
+    <h3>Transaction History:</h3>
+    <ul id="transactionHistory" class="transaction-history"></ul>
+  </div>
 
   <script src="scripts.js"></script>
 </body>
 </html>
 
-
-  <h2>Transaction Log</h2>
-  <ul id="log"></ul>
-  <script src="script.js"></script>
-</body>
-</html>
