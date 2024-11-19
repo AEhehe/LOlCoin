@@ -1,0 +1,19 @@
+body {
+  font-family: Arial, sans-serif;
+  max-width: 600px;
+  margin: auto;
+  text-align: center;
+}
+
+form {
+  margin: 20px 0;
+}
+
+input, button {
+  margin: 5px 0;
+  padding: 8px;
+}
+
+#log {
+  text-align: left;
+}
