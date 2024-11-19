@@ -1,104 +1,105 @@
-<script src="https://www.gstatic.com/firebasejs/9.x/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.x/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.x/firebase-database.js"></script>
+// Define the API Key and Bin ID for JSONbin
+const apiKey = "$2a$10$Eti1haWYiEHfN8NWMSZ.zeFpqBDokVahGAvEWfuNSsXXDMbnZYfiq"; // Replace with your actual API key
+const binId = "673c46cdacd3cb34a8aaf76c";           // Replace with your actual Bin ID
 
-// Firebase configuration (replace with your config from Firebase Console)
-const firebaseConfig = {
-  apiKey: "AIzaSyAenFp_Ryes3-0kLfb_vNR_PHLlsA08OK4",
-  authDomain: "lol-coin-9c308.firebaseapp.com",
-  projectId: "lol-coin-9c308",
-  storageBucket: "lol-coin-9c308.firebasestorage.app",
-  messagingSenderId: "143807595945",
-  appId: "1:143807595945:web:4234c550db627e4c0870b8",
-  measurementId: "G-CQGZ15FFJT"
-};
-
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.database();
-
-// Authentication
-firebase.auth().signInAnonymously().catch((error) => {
-  console.error("Error during authentication:", error);
-});
-
-// User-specific data
-let userId;
-
-// DOM elements
-const balanceElement = document.getElementById('balance');
-const form = document.getElementById('transfer-form');
-const logElement = document.getElementById('log');
-
-// Update balance display
-function updateBalance(balance) {
-  balanceElement.textContent = balance;
-}
-
-// Update transaction log display
-function updateTransactionLog(log) {
-  logElement.innerHTML = ''; // Clear log
-  log.forEach((entry) => {
-    const li = document.createElement('li');
-    li.textContent = entry;
-    logElement.appendChild(li);
-  });
-}
-
-// Handle form submission
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
-
-  const recipient = document.getElementById('recipient').value;
-  const amount = parseInt(document.getElementById('amount').value, 10);
-
-  const userRef = db.ref(`users/${userId}`);
-  userRef.once('value').then((snapshot) => {
-    const data = snapshot.val();
-    if (amount > data.balance) {
-      alert('Insufficient balance!');
-      return;
-    }
-
-    // Update balance
-    const newBalance = data.balance - amount;
-    userRef.update({ balance: newBalance });
-
-    // Add transaction
-    const newLog = [...(data.transactions || []), `Sent ${amount} coins to ${recipient}`];
-    userRef.update({ transactions: newLog });
-
-    // Clear form
-    form.reset();
-  });
-});
-
-// Firebase authentication listener
-firebase.auth().onAuthStateChanged((user) => {
-  if (user) {
-    userId = user.uid;
-    const userRef = db.ref(`users/${userId}`);
-    
-    // Initialize user data if not already set
-    userRef.once('value').then((snapshot) => {
-      if (!snapshot.exists()) {
-        userRef.set({ balance: 100, transactions: [] });
-      } else {
-        const data = snapshot.val();
-        updateBalance(data.balance);
-        updateTransactionLog(data.transactions);
-      }
-    });
-
-    // Listen for balance changes
-    userRef.child('balance').on('value', (snapshot) => {
-      updateBalance(snapshot.val());
-    });
-
-    // Listen for transaction log updates
-    userRef.child('transactions').on('value', (snapshot) => {
-      updateTransactionLog(snapshot.val() || []);
-    });
+// Function to create a new user in the database
+function createUser() {
+  const userId = document.getElementById("newUserId").value;
+  if (!userId) {
+    document.getElementById("createUserMessage").innerText = "User ID is required!";
+    return;
   }
-});
+
+  // Fetch the current data from JSONbin
+  fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+    method: "GET",
+    headers: {
+      "X-Master-Key": apiKey,
+    },
+  })
+    .then(response => response.json())
+    .then(data => {
+      const users = data.record || {};
+      if (users[userId]) {
+        document.getElementById("createUserMessage").innerText = "User already exists!";
+      } else {
+        // Add the new user with starting coins (e.g., 100)
+        users[userId] = { coins: 100 };
+        updateBin(users, "User created successfully with 100 coins.");
+      }
+    })
+    .catch(error => console.error("Error fetching users:", error));
+}
+
+// Function to update the user's coin balance
+function updateCoins() {
+  const userId = document.getElementById("manageUserId").value;
+  const coinAmount = parseInt(document.getElementById("coinAmount").value, 10);
+
+  if (!userId || isNaN(coinAmount)) {
+    document.getElementById("updateCoinMessage").innerText = "User ID and valid coin amount are required!";
+    return;
+  }
+
+  fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+    method: "GET",
+    headers: {
+      "X-Master-Key": apiKey,
+    },
+  })
+    .then(response => response.json())
+    .then(data => {
+      const users = data.record || {};
+      if (!users[userId]) {
+        document.getElementById("updateCoinMessage").innerText = "User does not exist!";
+      } else {
+        users[userId].coins += coinAmount; // Update the coin balance
+        updateBin(users, `User's coin balance updated by ${coinAmount}.`);
+      }
+    })
+    .catch(error => console.error("Error updating coins:", error));
+}
+
+// Function to check the user's coin balance
+function checkBalance() {
+  const userId = document.getElementById("checkUserId").value;
+  if (!userId) {
+    document.getElementById("balanceMessage").innerText = "User ID is required!";
+    return;
+  }
+
+  fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+    method: "GET",
+    headers: {
+      "X-Master-Key": apiKey,
+    },
+  })
+    .then(response => response.json())
+    .then(data => {
+      const users = data.record || {};
+      if (!users[userId]) {
+        document.getElementById("balanceMessage").innerText = "User does not exist!";
+      } else {
+        document.getElementById("balanceMessage").innerText = `User's balance: ${users[userId].coins} coins.`;
+      }
+    })
+    .catch(error => console.error("Error checking balance:", error));
+}
+
+// Function to update the JSONbin with new data
+function updateBin(data, successMessage) {
+  fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Master-Key": apiKey,
+    },
+    body: JSON.stringify(data),
+  })
+    .then(() => {
+      document.getElementById("createUserMessage").innerText = successMessage || "";
+      document.getElementById("updateCoinMessage").innerText = successMessage || "";
+    })
+    .catch(error => console.error("Error updating JSONbin:", error));
+}
 
