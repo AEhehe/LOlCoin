@@ -1,8 +1,25 @@
-// Initial balance
-let balance = 100;
+// Firebase configuration (replace with your config from Firebase Console)
+const firebaseConfig = {
+  apiKey: "AIzaSyAenFp_Ryes3-0kLfb_vNR_PHLlsA08OK4",
+  authDomain: "lol-coin-9c308.firebaseapp.com",
+  projectId: "lol-coin-9c308",
+  storageBucket: "lol-coin-9c308.firebasestorage.app",
+  messagingSenderId: "143807595945",
+  appId: "1:143807595945:web:4234c550db627e4c0870b8",
+  measurementId: "G-CQGZ15FFJT"
+};
 
-// Transaction log
-const log = [];
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// Authentication
+firebase.auth().signInAnonymously().catch((error) => {
+  console.error("Error during authentication:", error);
+});
+
+// User-specific data
+let userId;
 
 // DOM elements
 const balanceElement = document.getElementById('balance');
@@ -10,17 +27,18 @@ const form = document.getElementById('transfer-form');
 const logElement = document.getElementById('log');
 
 // Update balance display
-function updateBalance() {
+function updateBalance(balance) {
   balanceElement.textContent = balance;
 }
 
-// Add transaction to log
-function addTransactionLog(recipient, amount) {
-  const logEntry = `Sent ${amount} coins to ${recipient}`;
-  log.push(logEntry);
-  const li = document.createElement('li');
-  li.textContent = logEntry;
-  logElement.appendChild(li);
+// Update transaction log display
+function updateTransactionLog(log) {
+  logElement.innerHTML = ''; // Clear log
+  log.forEach((entry) => {
+    const li = document.createElement('li');
+    li.textContent = entry;
+    logElement.appendChild(li);
+  });
 }
 
 // Handle form submission
@@ -30,18 +48,53 @@ form.addEventListener('submit', (event) => {
   const recipient = document.getElementById('recipient').value;
   const amount = parseInt(document.getElementById('amount').value, 10);
 
-  if (amount > balance) {
-    alert('Insufficient balance!');
-    return;
-  }
+  const userRef = db.ref(`users/${userId}`);
+  userRef.once('value').then((snapshot) => {
+    const data = snapshot.val();
+    if (amount > data.balance) {
+      alert('Insufficient balance!');
+      return;
+    }
 
-  balance -= amount;
-  updateBalance();
-  addTransactionLog(recipient, amount);
+    // Update balance
+    const newBalance = data.balance - amount;
+    userRef.update({ balance: newBalance });
 
-  // Clear form
-  form.reset();
+    // Add transaction
+    const newLog = [...(data.transactions || []), `Sent ${amount} coins to ${recipient}`];
+    userRef.update({ transactions: newLog });
+
+    // Clear form
+    form.reset();
+  });
 });
 
-// Initial display
-updateBalance();
+// Firebase authentication listener
+firebase.auth().onAuthStateChanged((user) => {
+  if (user) {
+    userId = user.uid;
+    const userRef = db.ref(`users/${userId}`);
+    
+    // Initialize user data if not already set
+    userRef.once('value').then((snapshot) => {
+      if (!snapshot.exists()) {
+        userRef.set({ balance: 100, transactions: [] });
+      } else {
+        const data = snapshot.val();
+        updateBalance(data.balance);
+        updateTransactionLog(data.transactions);
+      }
+    });
+
+    // Listen for balance changes
+    userRef.child('balance').on('value', (snapshot) => {
+      updateBalance(snapshot.val());
+    });
+
+    // Listen for transaction log updates
+    userRef.child('transactions').on('value', (snapshot) => {
+      updateTransactionLog(snapshot.val() || []);
+    });
+  }
+});
+
