@@ -34,6 +34,7 @@ function createUser() {
 // Function to update the user's coin balance
 function updateCoins() {
   const userId = document.getElementById("manageUserId").value;
+  const userId2 = document.getElementById("manageUserId2").value;
   const coinAmount = parseInt(document.getElementById("coinAmount").value, 10);
 
   if (!userId || isNaN(coinAmount)) {
@@ -53,7 +54,8 @@ function updateCoins() {
       if (!users[userId]) {
         document.getElementById("updateCoinMessage").innerText = "User does not exist!";
       } else {
-        users[userId].coins += coinAmount; // Update the coin balance
+        users[userId].coins -= coinAmount; // Update the coin balance
+        users[userId2].coins += coinAmount;
         updateBin(users, `User's coin balance updated by ${coinAmount}.`);
       }
     })
