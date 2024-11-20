@@ -86,8 +86,7 @@
           if (!users[userId]) {
             document.getElementById("updateCoinMessage").innerText = "User does not exist!";
           } else {
-            users[userId].coins -= coinAmount;
-            updateBin(users, `User's coin balance updated by ${coinAmount}.`);
+            users[userId].coins += coinAmount;
             users[userId2].coins += coinAmount;
             updateBin(users, `User's coin balance updated by ${coinAmount}.`);
           }
